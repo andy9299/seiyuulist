@@ -1,0 +1,1 @@
+https://docs.api.jikan.moe/

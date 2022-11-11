@@ -4,7 +4,7 @@
 \- Functionality to favorite artists/anime (accounts needed)  
 \- Functionality to filter anime based on 1 to x amount of voice actors  
 \- Homepage displayed with voice actors from newest animes  
-\- Suggestions page on user page   
+\- User page displays top 10 favorites   
 ### 2. What kind of users will visit your site? In other words, what is the demographic of
 your users?  
 \- People who are looking for anime based on voice actors
@@ -25,4 +25,4 @@ which is fine, just outline what kind of data you would like it to contain.
 * What will the user flow look like?  
 \-  homepage (able to view voice actors from recent anime) -> login/register in navbar -> search animes/voice actors -> favorite -> view suggestions  
 * What features make your site more than CRUD? Do you have any stretch goals?  
-\- not sure
+\- follows / follows activity page
