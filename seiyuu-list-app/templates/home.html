@@ -1,8 +1,59 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Some Stuff</h1>
-<h2>Get to know some seiyuu from a top seasonal anime!</h2>
-<small>Refresh to get another seasonal anime!</small>
-<div>
+
+<h2>Here's a random top seasonal anime to get started:</h2>
+<div class="mb-3 text-center">
+    <small>Refresh to get another seasonal anime!</small>
 </div>
-{% endblock %}
+<div class="my-3">
+    <a href="/show/{{show_info.id}}" class="link-light">
+        <h2 class=" text-center">{{show_info.title}}</h3>
+    </a>
+    <div class="row">
+        <div class="col-md-3">
+            <a href="/show/{{show_info.id}}">
+                <img src="{{show_info.image_url}}" alt="/static/no_image.png">
+            </a>
+        </div>
+        <div class="col-md-9">
+            {{show_info.synopsis}}
+            <br>
+            <b>Rating: </b>{{show_info.rating}} {{show_info.type}}
+            <br>
+            <b>Genres</b>:
+            {% for genre in show_info.genres %}
+            {{genre}}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<div>
+    <h4>Here are the main characters!</h4>
+    {% for info in charas_info %}
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col">
+                <a href="/person/{{info.seiyuu_id}}">
+                    <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="/static/no_image.png">
+                </a>
+            </div>
+            <div class="col align-self-center text-center">
+                {{info.seiyuu_name}} as {{info.chara_name}}
+            </div>
+            <div class="col text-right">
+                <a href="/character/{{info.chara_id}}">
+                    <img class="img-thumbnail normal-img" src="{{info.chara_image_url}}" alt="/static/no_image.png">
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    <h2>All Seasonals</h2>
+    <div class="img-container">
+        {% for show in all_seasonals %}
+        <a href="/show/{{show.id}}">
+            <img class="small-img" src="{{show.image_url}}" alt="/static/no_image.png">
+        </a>
+        {% endfor %}
+    </div>
+    {% endblock %}

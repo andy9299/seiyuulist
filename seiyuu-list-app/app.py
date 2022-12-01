@@ -3,6 +3,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 import os
 import requests
 import random
+import time
 
 CURR_USER_KEY = "curr_user"
 BASE_URL = "https://api.jikan.moe/v4"
@@ -40,15 +41,18 @@ def get_info_from_charas_data(data, *role):
     for character in data:
         if (role[0] == None or character.get('role')[0].lower() == role[0]):
             characters.append({
-                'chara_id': character.get('mal_id'),
+                'chara_id': character.get('character').get('mal_id'),
                 'chara_name': character.get('character').get('name'),
                 'chara_image_url': character.get('character').get('images').get('jpg').get('image_url'),
                 'role': character.get('role'),
-                'seiyuu_id': character.get('voice_actors')[0].get('mal_id'),
-                'seiyuu_name': character.get('voice_actors')[0].get('name'),
+                'seiyuu_id': character.get('voice_actors')[0].get('person').get('mal_id'),
+                'seiyuu_name': character.get('voice_actors')[0].get('person').get('name'),
                 'seiyuu_image_url': character.get('voice_actors')[0].get('person').get('images').get('jpg').get('image_url')
             })
     return characters
+
+def get_thumbnails_from_season_data(data):
+    return
 
 @app.before_request
 def add_user_to_g():
@@ -64,9 +68,25 @@ def add_user_to_g():
 @app.route("/")
 def root():
     """Homepage."""
-
     seasonals_req = requests.get(f"{BASE_URL}/seasons/now").json()
     show_info = get_info_from_show_data(random.choice(seasonals_req.get('data')))
+    all_seasonals = []
+    page = 1
+    while True:
+        # to prevent rate limiting
+        time.sleep(.5)
+        for show in seasonals_req.get('data'):
+            all_seasonals.append({
+                'id': show.get('mal_id'),
+                'image_url': show.get('images').get('jpg').get('image_url'),
+                'title': show.get('title'),
+            })
+        page += 1
+        seasonals_req = requests.get(f"{BASE_URL}/seasons/now", params={'page': page}).json()
+        if (not seasonals_req.get('pagination').get('has_next_page')):
+            break
     charas_req = requests.get(f"{BASE_URL}/anime/{show_info.get('id')}/characters").json()
     charas_info = get_info_from_charas_data(charas_req.get('data'), 'm')
-    return render_template('home.html')
+    return render_template('home.html', show_info=show_info, charas_info=charas_info, all_seasonals=all_seasonals)
+
+
