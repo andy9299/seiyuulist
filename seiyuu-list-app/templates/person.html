@@ -22,7 +22,7 @@
 <h3>Main Roles:</h3>
 <div class="img-container text-center mb-3">
     {% for chara in main_roles %}
-    <a href="/show/{{chara.anime_id}}" class="link-light">
+    <a href="/anime/{{chara.anime_id}}" class="link-light">
         <div class="card bg-dark">
             <div class="row no-gutters">
                 <div class="col-auto">
@@ -45,7 +45,7 @@
 <h3>Supporting Roles:</h3>
 <div class="img-container">
     {% for chara in sup_roles %}
-    <a href="/show/{{chara.anime_id}}" class="link-light">
+    <a href="/anime/{{chara.anime_id}}" class="link-light">
         <div class="card bg-dark">
             <div class="row no-gutters">
                 <div class="col-auto">
@@ -64,14 +64,8 @@
 </div>
 {% endif %}
 
-
-
-
-
-
-
-
-
-
+{% if main_roles|length == 0 and sup_roles|length == 0 %}
+<h2>No voice acting roles!</h2>
+{% endif %}
 
 {% endblock %}

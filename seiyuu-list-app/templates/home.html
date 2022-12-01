@@ -31,17 +31,19 @@
 <div class="container mb-3">
     <div class="row">
         <div class="col">
+            {% if info.seiyuu_id %}
             <a href="/person/{{info.seiyuu_id}}">
                 <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
             </a>
+            {% else %}
+            <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
+            {% endif %}
         </div>
         <div class="col align-self-center text-center">
             {{info.seiyuu_name}} as {{info.chara_name}}
         </div>
         <div class="col text-right">
-            <a href="/character/{{info.chara_id}}">
-                <img class="img-thumbnail normal-img" src="{{info.chara_image_url}}" alt="image not found!">
-            </a>
+            <img class="img-thumbnail normal-img" src="{{info.chara_image_url}}" alt="image not found!">
         </div>
     </div>
 </div>

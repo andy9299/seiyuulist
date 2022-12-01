@@ -45,7 +45,7 @@ def get_info_from_charas_data(data, role=None):
                 'chara_name': character.get('character').get('name'),
                 'chara_image_url': character.get('character').get('images').get('jpg').get('image_url'),
                 'role': character.get('role')}
-            if (character.get('voice_actors') is not None):
+            if (character.get('voice_actors') is not None and character.get('voice_actors')):
                 chara_info['seiyuu_id'] = character.get('voice_actors')[0].get('person').get('mal_id')
                 chara_info['seiyuu_name'] = character.get('voice_actors')[0].get('person').get('name')
                 chara_info['seiyuu_image_url'] = character.get('voice_actors')[0].get('person').get('images').get('jpg').get('image_url')
@@ -63,7 +63,7 @@ def get_info_from_person_data(person):
             'name': person.get('name'),
             'jp_name': person.get('family_name') + " " + person.get('given_name'),
             'image_url': person.get('images').get('jpg').get('image_url'),
-            'about': person.get('about').strip(),
+            'about': person.get('about'),
             'birthday': person.get('birthday'),
             'website_url': person.get('website_url')
     }
@@ -99,7 +99,7 @@ def root():
         seasonals_req = requests.get(f"{BASE_URL}/seasons/now", params={'page': page}).json()
         if (not seasonals_req.get('pagination').get('has_next_page')):
             break
-        
+
     charas_req = requests.get(f"{BASE_URL}/anime/{anime_info.get('id')}/characters").json()
     charas_info = get_info_from_charas_data(charas_req.get('data'), 'main')
 
