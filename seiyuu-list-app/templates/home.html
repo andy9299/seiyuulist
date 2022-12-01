@@ -6,54 +6,52 @@
     <small>Refresh to get another seasonal anime!</small>
 </div>
 <div class="my-3">
-    <a href="/show/{{show_info.id}}" class="link-light">
-        <h2 class=" text-center">{{show_info.title}}</h3>
+    <a href="/anime/{{anime_info.id}}" class="link-light">
+        <h2 class=" text-center">{{anime_info.title}}</h2>
     </a>
     <div class="row">
         <div class="col-md-3">
-            <a href="/show/{{show_info.id}}">
-                <img src="{{show_info.image_url}}" alt="/static/no_image.png">
+            <a href="/anime/{{anime_info.id}}">
+                <img src="{{anime_info.image_url}}" alt="image not found!">
             </a>
         </div>
-        <div class="col-md-9">
-            {{show_info.synopsis}}
-            <br>
-            <b>Rating: </b>{{show_info.rating}} {{show_info.type}}
-            <br>
+        <div class="col-md-9" style="white-space: pre-wrap;">
+            {{anime_info.synopsis}}
+            <b>Rating: </b>{{anime_info.rating}} {{anime_info.type}}
             <b>Genres</b>:
-            {% for genre in show_info.genres %}
-            {{genre}}
-            {% endfor %}
+            {%- for genre in anime_info.genres -%}
+            {{" " + genre}}
+            {%- endfor -%}
         </div>
     </div>
 </div>
-<div>
-    <h4>Here are the main characters!</h4>
-    {% for info in charas_info %}
-    <div class="container mb-3">
-        <div class="row">
-            <div class="col">
-                <a href="/person/{{info.seiyuu_id}}">
-                    <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="/static/no_image.png">
-                </a>
-            </div>
-            <div class="col align-self-center text-center">
-                {{info.seiyuu_name}} as {{info.chara_name}}
-            </div>
-            <div class="col text-right">
-                <a href="/character/{{info.chara_id}}">
-                    <img class="img-thumbnail normal-img" src="{{info.chara_image_url}}" alt="/static/no_image.png">
-                </a>
-            </div>
+
+<h4>Here are the main characters!</h4>
+{% for info in charas_info %}
+<div class="container mb-3">
+    <div class="row">
+        <div class="col">
+            <a href="/person/{{info.seiyuu_id}}">
+                <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
+            </a>
+        </div>
+        <div class="col align-self-center text-center">
+            {{info.seiyuu_name}} as {{info.chara_name}}
+        </div>
+        <div class="col text-right">
+            <a href="/character/{{info.chara_id}}">
+                <img class="img-thumbnail normal-img" src="{{info.chara_image_url}}" alt="image not found!">
+            </a>
         </div>
     </div>
+</div>
+{% endfor %}
+<h2>All Seasonals</h2>
+<div class="img-container">
+    {% for anime in all_seasonals %}
+    <a href="/anime/{{anime.id}}">
+        <img class="small-img rounded" src="{{anime.image_url}}" alt="image not found!">
+    </a>
     {% endfor %}
-    <h2>All Seasonals</h2>
-    <div class="img-container">
-        {% for show in all_seasonals %}
-        <a href="/show/{{show.id}}">
-            <img class="small-img" src="{{show.image_url}}" alt="/static/no_image.png">
-        </a>
-        {% endfor %}
-    </div>
-    {% endblock %}
+</div>
+{% endblock %}

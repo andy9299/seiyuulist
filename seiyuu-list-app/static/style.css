@@ -16,5 +16,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 3px;
-    align-items: center
+    align-items: center;
+    justify-content: center;
+
 }

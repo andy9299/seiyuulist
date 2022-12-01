@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mb-3">
+    <h2 class=" text-center">{{info.name}}</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <img src="{{info.image_url}}" alt="image not found!">
+                {% if session['current_user'] %}
+                <!-- add favoriting here -->
+                {% endif %}
+            </div>
+            <div class="col-md-9" style="white-space: pre-wrap;">
+                {%- if info.about -%}
+                {{info.about|urlize}}
+                {%- endif -%}
+            </div>
+        </div>
+</div>
+
+{% if main_roles %}
+<h3>Main Roles:</h3>
+<div class="img-container text-center mb-3">
+    {% for chara in main_roles %}
+    <a href="/show/{{chara.anime_id}}" class="link-light">
+        <div class="card bg-dark">
+            <div class="row no-gutters">
+                <div class="col-auto">
+                    <img src="{{chara.chara_image_url}}" class="img-fluid" alt="image not found!">
+                </div>
+                <div class="col">
+                    <div class="card-block px-2">
+                        <h4 class="card-title">{{chara.chara_name}}</h4>
+                        <p class="card-text">{{chara.title}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if sup_roles %}
+<h3>Supporting Roles:</h3>
+<div class="img-container">
+    {% for chara in sup_roles %}
+    <a href="/show/{{chara.anime_id}}" class="link-light">
+        <div class="card bg-dark">
+            <div class="row no-gutters">
+                <div class="col-auto">
+                    <img src="{{chara.chara_image_url}}" class="img-fluid" alt="image not found!">
+                </div>
+                <div class="col">
+                    <div class="card-block px-2">
+                        <h4 class="card-title">{{chara.chara_name}}</h4>
+                        <p class="card-text">{{chara.title}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+
+{% endblock %}
