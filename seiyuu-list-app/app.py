@@ -91,6 +91,9 @@ def get_info_from_person_data(person):
         "website_url": person.get("website_url"),
     }
 
+def get_jikan_request(url, params=None):
+    return requests.get(f"{BASE_URL}{url}", params).json()
+
 @app.before_request
 def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
@@ -106,7 +109,7 @@ def add_user_to_g():
 @app.route("/")
 def root():
     """Homepage."""
-    seasonals_req = requests.get(f"{BASE_URL}/seasons/now").json()
+    seasonals_req = get_jikan_request("/seasons/now")
     anime_info = get_info_from_show_data(random.choice(seasonals_req.get("data")))
     all_seasonals = []
     page = 1
@@ -122,15 +125,11 @@ def root():
                 }
             )
         page += 1
-        seasonals_req = requests.get(
-            f"{BASE_URL}/seasons/now", params={"page": page}
-        ).json()
+        seasonals_req = get_jikan_request("/seasons/now", {"page": page})
         if not seasonals_req.get("pagination").get("has_next_page"):
             break
 
-    characters_req = requests.get(
-        f"{BASE_URL}/anime/{anime_info.get('id')}/characters"
-    ).json()
+    characters_req = get_jikan_request(f"/anime/{anime_info.get('id')}/characters")
     characters_info = get_info_from_characters_data(characters_req.get("data"), "main")
 
     return render_template(
@@ -145,7 +144,7 @@ def root():
 def person_info(person_id):
     """View information about a person"""
 
-    person_req = requests.get(f"{BASE_URL}/people/{person_id}/full").json()
+    person_req = get_jikan_request(f"/people/{person_id}/full")
     info = get_info_from_person_data(person_req.get("data"))
     main_roles = get_info_from_characters_data(person_req.get("data").get("voices"), "main")
     sup_roles = get_info_from_characters_data(
@@ -161,10 +160,10 @@ def person_info(person_id):
 def anime_info(anime_id):
     """View information about an anime"""
 
-    anime_req = requests.get(f"{BASE_URL}/anime/{anime_id}/full").json()
+    anime_req = get_jikan_request(f"/anime/{anime_id}/full")
     info = get_info_from_show_data(anime_req.get("data"))
 
-    characters_req = requests.get(f"{BASE_URL}/anime/{anime_id}/characters").json()
+    characters_req = get_jikan_request(f"/anime/{anime_id}/characters")
     main_characters = get_info_from_characters_data(characters_req.get("data"), "main")
     sup_characters = get_info_from_characters_data(characters_req.get("data"), "supporting")
     return render_template(
