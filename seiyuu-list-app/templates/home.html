@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
+{% if anime_info %}
 <h2>Here's a random top seasonal anime to get started:</h2>
 <div class="mb-3 text-center">
   <small>Refresh to get another seasonal anime!</small>
@@ -25,9 +26,11 @@
     </div>
   </div>
 </div>
+{% endif %}
 
+{% if characters_info %}
 <h4>Here are the main characters!</h4>
-{% for info in charas_info %}
+{% for info in characters_info %}
 <div class="container mb-3">
   <div class="row">
     <div class="col">
@@ -40,14 +43,17 @@
       {% endif %}
     </div>
     <div class="col align-self-center text-center">
-      {{info.seiyuu_name}} as {{info.chara_name}}
+      {{info.seiyuu_name}} as {{info.character_name}}
     </div>
     <div class="col text-right">
-      <img class="img-thumbnail normal-img" src="{{info.chara_image_url}}" alt="image not found!">
+      <img class="img-thumbnail normal-img" src="{{info.character_image_url}}" alt="image not found!">
     </div>
   </div>
 </div>
 {% endfor %}
+{% endif %}
+
+{% if all_seasonals %}
 <h2>All Seasonals</h2>
 <div class="img-container">
   {% for anime in all_seasonals %}
@@ -56,4 +62,6 @@
   </a>
   {% endfor %}
 </div>
+{% endif %}
+
 {% endblock %}
