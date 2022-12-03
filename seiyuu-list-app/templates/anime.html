@@ -1,68 +1,68 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mb-3">
-    <h2 class=" text-center">{{info.title}}</h2>
-    <div class="row">
-        <div class="col-md-3">
-            <img src="{{info.image_url}}" alt="image not found!">
-            {% if session['current_user'] %}
-            <!-- add favoriting here -->
-            {% endif %}
-        </div>
-        <div class="col-md-9" style="white-space: pre-wrap;">
-            {%- if info.synopsis -%}
-            {{info.synopsis}}
-            {%- endif -%}
-        </div>
+  <h2 class=" text-center">{{info.title}}</h2>
+  <div class="row">
+    <div class="col-md-3">
+      <img src="{{info.image_url}}" alt="image not found!">
+      {% if session['current_user'] %}
+      <!-- add favoriting here -->
+      {% endif %}
     </div>
+    <div class="col-md-9" style="white-space: pre-wrap;">
+      {%- if info.synopsis -%}
+      {{info.synopsis}}
+      {%- endif -%}
+    </div>
+  </div>
 </div>
 
-{% if main_charas %}
+{% if main_characters %}
 <h3>Main Characters:</h3>
-{% for info in main_charas %}
+{% for info in main_characters %}
 <div class="container mb-3">
-    <div class="row">
-        <div class="col">
-            {% if info.seiyuu_id %}
-            <a href="/person/{{info.seiyuu_id}}">
-                <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
-            </a>
-            {% else %}
-            <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
-            {% endif %}
-        </div>
-        <div class="col align-self-center text-center">
-            {{info.seiyuu_name}} as {{info.chara_name}}
-        </div>
-        <div class="col text-right">
-            <img class="img-thumbnail normal-img" src="{{info.chara_image_url}}" alt="image not found!">
-        </div>
+  <div class="row">
+    <div class="col">
+      {% if info.seiyuu_id %}
+      <a href="/person/{{info.seiyuu_id}}">
+        <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
+      </a>
+      {% else %}
+      <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
+      {% endif %}
     </div>
+    <div class="col align-self-center text-center">
+      {{info.seiyuu_name}} as {{info.character_name}}
+    </div>
+    <div class="col text-right">
+      <img class="img-thumbnail normal-img" src="{{info.character_image_url}}" alt="image not found!">
+    </div>
+  </div>
 </div>
 {% endfor %}
 {% endif %}
 
-{% if sup_charas %}
+{% if sup_characters %}
 <h3>Support Characters:</h3>
-{% for info in sup_charas %}
+{% for info in sup_characters %}
 <div class="container mb-3">
-    <div class="row">
-        <div class="col">
-            {% if info.seiyuu_id %}
-            <a href="/person/{{info.seiyuu_id}}">
-                <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
-            </a>
-            {% else %}
-            <img class="img-thumbnail normal-img" src="/static/no_image.png" alt="image not found!">
-            {% endif %}
-        </div>
-        <div class="col align-self-center text-center">
-            {{info.seiyuu_name}} as {{info.chara_name}}
-        </div>
-        <div class="col text-right">
-            <img class="img-thumbnail normal-img" src="{{info.chara_image_url}}" alt="image not found!">
-        </div>
+  <div class="row">
+    <div class="col">
+      {% if info.seiyuu_id %}
+      <a href="/person/{{info.seiyuu_id}}">
+        <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
+      </a>
+      {% else %}
+      <img class="img-thumbnail normal-img" src="/static/no_image.png" alt="image not found!">
+      {% endif %}
     </div>
+    <div class="col align-self-center text-center">
+      {{info.seiyuu_name}} as {{info.character_name}}
+    </div>
+    <div class="col text-right">
+      <img class="img-thumbnail normal-img" src="{{info.character_image_url}}" alt="image not found!">
+    </div>
+  </div>
 </div>
 {% endfor %}
 {% endif %}
