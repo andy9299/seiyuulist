@@ -8,16 +8,20 @@
 </div>
 <div class="my-3">
   <a href="/anime/{{anime_info.id}}" class="link-light">
-    <h2 class=" text-center">{{anime_info.title}}</h2>
+    <h1 class=" text-center">{{anime_info.title}}</h1>
   </a>
   <div class="row">
     <div class="col-md-3">
       <a href="/anime/{{anime_info.id}}">
-        <img src="{{anime_info.image_url}}" alt="image not found!">
+        <img src="{{anime_info.image_url}}" class="normal-img" alt="image not found!">
       </a>
     </div>
     <div class="col-md-9" style="white-space: pre-wrap;">
-      {{anime_info.synopsis}}
+      {%- if anime_info.synopsis -%}
+      {{ anime_info.synopsis }}
+      {%- else -%}
+      No information found!
+      {%- endif -%}
       <b>Rating: </b>{{anime_info.rating}} {{anime_info.type}}
       <b>Genres</b>:
       {%- for genre in anime_info.genres -%}
@@ -29,24 +33,30 @@
 {% endif %}
 
 {% if characters_info %}
-<h4>Here are the main characters!</h4>
+<h3>Here are the main characters!</h3>
 {% for info in characters_info %}
 <div class="container mb-3">
   <div class="row">
     <div class="col">
       {% if info.seiyuu_id %}
       <a href="/person/{{info.seiyuu_id}}">
-        <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
+        <img class="normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
       </a>
       {% else %}
-      <img class="img-thumbnail normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
+      <img class="normal-img" src="{{info.seiyuu_image_url}}" alt="image not found!">
       {% endif %}
     </div>
     <div class="col align-self-center text-center">
       {{info.seiyuu_name}} as {{info.character_name}}
     </div>
     <div class="col text-right">
-      <img class="img-thumbnail normal-img" src="{{info.character_image_url}}" alt="image not found!">
+      {% if info.character_id %}
+      <a href="/character/{{info.character_id}}">
+        <img class="normal-img" src="{{info.character_image_url}}" alt="image not found!">
+      </a>
+      {% else %}
+      <img class="normal-img" src="{{info.character_image_url}}" alt="image not found!">
+      {% endif %}
     </div>
   </div>
 </div>
@@ -58,7 +68,7 @@
 <div class="img-container">
   {% for anime in all_seasonals %}
   <a href="/anime/{{anime.id}}">
-    <img class="small-img rounded" src="{{anime.image_url}}" alt="image not found!">
+    <img class="small-img" src="{{anime.image_url}}" alt="image not found!">
   </a>
   {% endfor %}
 </div>

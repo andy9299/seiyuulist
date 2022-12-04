@@ -59,11 +59,11 @@
   </nav>
 
   <div class="container mt-2">
-    {% block content %}
-    {% endblock %}
     {% for msg in get_flashed_messages() %}
     <p class="text-danger mt-2 rounded">{{ msg }}</p>
     {% endfor %}
+    {% block content %}
+    {% endblock %}
   </div>
 
 </body>

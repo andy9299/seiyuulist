@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if request.args.get('type') == 'anime' %}
+{% for result in results %}
+<div class="container mb-3">
+  <a href="/{{request.args.get('type')}}/{{result.id}}" class="link-light">
+    <h2 class=" text-center">{{result.title}}</h2>
+  </a>
+  <div class="row">
+    <div class="col-md-3">
+      <a href="/{{request.args.get('type')}}/{{result.id}}">
+        <img class="normal-img" src="{{result.image_url}}" alt="image not found!">
+      </a>
+    </div>
+    <div class="col-md-9" style="white-space: pre-wrap;">
+      {%- if result.synopsis -%}
+      {{result.synopsis}}
+      {%- else -%}
+      No information found!
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% elif request.args.get('type') == 'characters' %}
+{% for result in results %}
+<div class="container mb-3">
+  <a href="/{{request.args.get('type')[:-1]}}/{{result.character_id}}" class="link-light">
+    <h2 class=" text-center">{{result.character_name}}</h2>
+  </a>
+  <div class="row">
+    <div class="col-md-3">
+      <a href="/{{request.args.get('type')[:-1]}}/{{result.character_id}}">
+        <img class="normal-img" src="{{result.character_image_url}}" alt="image not found!">
+      </a>
+    </div>
+    <div class="col-md-9" style="white-space: pre-wrap;">
+      {%- if result.about -%}
+      {{result.about}}
+      {%- else -%}
+      No information found!
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% elif request.args.get('type') == 'people' %}
+{% for result in results %}
+<div class="container mb-3">
+  <a href="/{{request.args.get('type')}}/{{result.id}}" class="link-light">
+    <h2 class=" text-center">{{result.name}}</h2>
+  </a>
+  <div class="row">
+    <div class="col-md-3">
+      <a href="/{{request.args.get('type')}}/{{result.id}}">
+        <img class="normal-img" src="{{result.image_url}}" alt="image not found!">
+      </a>
+    </div>
+    <div class="col-md-9" style="white-space: pre-wrap;">
+      {%- if result.about -%}
+      {{result.about|urlize}}
+      {%- else -%}
+      No information found!
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<div>
+  {% for page in range(pages) %}
+  <a href="/search/?type={{ request.args.get('type')}}&q={{ request.args.get('q') }}&p={{page + 1}}">{{page + 1}}</a>
+  {% endfor %}
+</div>
+{% endblock %}
