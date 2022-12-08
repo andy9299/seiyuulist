@@ -5,7 +5,7 @@
   <h2 class=" text-center">{{user.username}}</h2>
   <div class="row">
     <div class="col-md-3">
-      <img src="{{g.user.image_url}}" alt="image not found!" class="img-thumbnail normal-img">
+      <img src="{{user.image_url}}" alt="image not found!" class="img-thumbnail normal-img">
     </div>
     <div class="col-md-9" style="white-space: pre-wrap;">
       {%- if user.bio -%}
@@ -21,4 +21,22 @@
   Edit Profile
 </a>
 {% endif %}
+
+{% if favorites %}
+<h3 class="mt-3">Favorite Seiyuu:</h3>
+
+<div class="img-container favorites-grid">
+  {% for seiyuu in favorites %}
+  <figure class="figure">
+    <a href="/person/{{seiyuu.id}}">
+      <img src="{{seiyuu.image_url}}" class="img-thumbnail normal-img" alt="Image not found!">
+    </a>
+    <figcaption class="figure-caption mt-1">{{seiyuu.name}}</figcaption>
+  </figure>
+  {% endfor %}
+</div>
+
+
+{% endif %}
+
 {% endblock %}

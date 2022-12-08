@@ -3,7 +3,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from sqlalchemy.exc import IntegrityError
 
-from models import db, connect_db, User, LikedAnime
+from models import db, connect_db, User, FavoriteSeiyuu
 from forms import RegisterForm, LoginForm, EditUser
 
 import os
@@ -29,7 +29,7 @@ debug = DebugToolbarExtension(app)
 connect_db(app)
 
 #
-### PARSING JIKANAPI DATA
+### PROCESSING JIKANAPI DATA
 #
 
 def get_info_from_anime_data(anime_data):
@@ -381,8 +381,25 @@ def show_user(user_id):
     """Show user profile."""
 
     user = User.query.get_or_404(user_id)
+    favorites_query = (db.session
+                .query(FavoriteSeiyuu.seiyuu_id)
+                .filter(FavoriteSeiyuu.user_id==user_id)
+                .order_by(FavoriteSeiyuu.rank.asc())
+                .limit(20)
+                .all())
+    try:
+        favorites = []
+        for (id,) in favorites_query:
+            time.sleep(WAIT_TIME)
+            person_req = get_jikan_request(f"/people/{id}")
+            person_data = get_info_from_person_data(person_req.get("data"))
+            favorites.append(person_data)
+            
+    except ValueError:
+        flash("Something went wrong with the api request!")
+        return redirect(url_for('root'))        
 
-    return render_template('users/user-information.html', user=user)
+    return render_template('users/user-information.html', user=user, favorites=favorites)
 
 @app.route("/users/edit/", methods=["GET", "POST"])
 def edit_user():
@@ -411,3 +428,8 @@ def edit_user():
         flash("Invalid credentials.", 'danger')
 
     return render_template('users/edit.html', form=form)
+
+#
+### FAVORITING ROUTES
+#
+

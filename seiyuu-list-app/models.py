@@ -78,12 +78,12 @@ class User(db.Model):
 
         return False
 
-class LikedAnime(db.Model):
-    """User's liked anime"""
+class FavoriteSeiyuu(db.Model):
+    """User's favorited seiyuu (voice actor)"""
 
-    __tablename__ = 'likedAnime'
+    __tablename__ = 'liked_seiyuu'
 
-    anime_id = db.Column(
+    seiyuu_id = db.Column(
         db.Integer,
         primary_key=True
     )
@@ -96,6 +96,8 @@ class LikedAnime(db.Model):
         db.Integer,
         nullable=False
     )
+    def __repr__(self):
+        return f"<FavoriteSeiyuu user {self.user_id}, seiyuu {self.seiyuu_id}, rank {self.rank}>"
 
 def connect_db(app):
     """Connect this database to provided Flask app.

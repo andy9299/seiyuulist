@@ -24,8 +24,8 @@
       {{ form.password(placeholder="Enter your password to confirm", class="form-control mb-1") }}
 
       <div class="edit-btn-area">
-        <button class="btn btn-outline-success">Edit this user!</button>
-        <a href="/users/{{ user_id }}" class="btn btn-outline-danger">Cancel</a>
+        <button class="btn btn-outline-success">Edit Me!</button>
+        <a href="/users/{{ g.user.id }}" class="btn btn-outline-danger">Cancel</a>
       </div>
     </form>
   </div>
