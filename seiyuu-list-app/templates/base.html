@@ -40,9 +40,14 @@
         <input name="q" class="form-control ml-1" placeholder="Search" id="search">
         <button class="btn btn-outline-success ml-2">Search</button>
       </form>
-      {% if session['current_user'] %}
-      <div class=" navbar-nav ml-auto">
-        <form class="form-inline" action="/logout" method="post">
+      {% if g.user %}
+      <div class="navbar-nav ml-2">
+        <a class="btn btn-outline-success" href="/users/{{g.user.id}}">
+          My Profile
+        </a>
+      </div>
+      <div class=" navbar-nav ml-2">
+        <form class="form-inline" action="/logout">
           <button class="btn btn-outline-danger">Logout</button>
         </form>
       </div>

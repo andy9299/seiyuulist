@@ -1,9 +1,16 @@
-from flask import Flask, request, redirect, render_template, flash, session, jsonify, g, url_for
+from flask import Flask, request, redirect, render_template, flash, session, g, url_for
 from flask_debugtoolbar import DebugToolbarExtension
+
+from sqlalchemy.exc import IntegrityError
+
+from models import db, connect_db, User, LikedAnime
+from forms import RegisterForm, LoginForm, EditUser
+
 import os
 import requests
 import random
 import time
+
 
 CURR_USER_KEY = "curr_user"
 BASE_URL = "https://api.jikan.moe/v4"
@@ -11,12 +18,19 @@ WAIT_TIME = .5
 
 app = Flask(__name__)
 
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    os.environ.get('DATABASE_URL', 'postgresql:///seiyuulist'))
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "qwerty")
 
 debug = DebugToolbarExtension(app)
+connect_db(app)
 
+#
+### PARSING JIKANAPI DATA
+#
 
 def get_info_from_anime_data(anime_data):
     """Given a response from jikanapi about an anime, extract the data"""
@@ -37,10 +51,10 @@ def get_info_from_anime_data(anime_data):
 
 def get_info_by_role(data, type, role=None):
     """
-    Given a response from jikanapi that has a list of characters/anime
-    filter the list by role with 'main' (Main roles), 
-    or 'supporting' (Supporting roles).
-    Not specifying type will grab all the characters.
+    Given a response from jikanapi that has a list of characters/anime filter the list by role with 'main' (Main roles), 
+    or 'supporting' (Supporting roles). Not specifying role will grab all the characters.
+    The "type" variable is to determine what kind of infomation is in the data.
+    Either 'character' or 'anime' information.
     """
     info = []
     if type.lower() == "character":
@@ -139,19 +153,38 @@ def get_jikan_request(url, params=None):
     request = requests.get(f"{BASE_URL}{url}", params).json()
     if 'error' in request:
         # This means there isn't the correct data in the api request
-        raise KeyError
+        raise ValueError
     return request
+
+#
+### USER LOGIN/LOGOUT
+#
+
+def do_login(user):
+    """Log in user."""
+
+    session[CURR_USER_KEY] = user.id
+
+
+def do_logout():
+    """Logout user."""
+
+    if CURR_USER_KEY in session:
+        del session[CURR_USER_KEY]
 
 @app.before_request
 def add_user_to_g():
     """If we're logged in, add curr user to Flask global."""
 
     if CURR_USER_KEY in session:
-        # get user later and add to flask global g
-        return
+        g.user = User.query.get(session[CURR_USER_KEY])
 
     else:
         g.user = None
+
+#
+### HOMEPAGE
+#
 
 @app.route("/")
 def root():
@@ -186,10 +219,13 @@ def root():
             all_seasonals=all_seasonals,
         )
 
-    except KeyError:
+    except ValueError:
         flash("Something went wrong with the api request!")
         return render_template("home.html")
 
+#
+### PARSED INFORMATION ROUTES
+#
 
 @app.route("/person/<int:person_id>")
 def person_info(person_id):
@@ -205,7 +241,7 @@ def person_info(person_id):
             "person.html", info=info, main_roles=main_roles, sup_roles=sup_roles
         )
 
-    except KeyError:
+    except ValueError:
         flash("Something went wrong with the api request!")
         return redirect(url_for('root'))
 
@@ -224,7 +260,7 @@ def anime_info(anime_id):
             "anime.html", info=info, main_characters=main_characters, sup_characters=sup_characters
         )
 
-    except KeyError:
+    except ValueError:
         flash("Something went wrong with the api request!")
         return redirect(url_for('root'))
 
@@ -242,7 +278,7 @@ def character_info(character_id):
             character_info=character_info, main_character_anime=main_character_anime, sup_character_anime=sup_character_anime
             )
 
-    except KeyError:
+    except ValueError:
         flash("Something went wrong with the api request!")
         return redirect(url_for('root'))
 
@@ -268,6 +304,110 @@ def search():
 
         return render_template("search.html", results=results, pages=pages)
 
-    except KeyError:
+    except ValueError:
         flash("Something went wrong with the api request!")
         return redirect(url_for('root'))
+
+#
+### USER REGISTRATION/LOGIN/LOGOUT ROUTES
+#
+
+@app.route("/register/", methods=["GET", "POST"])
+def register():
+    """Handle user registration
+    Display form (GET request) or create new user and add to DB (POST request)
+    If the registration is invalid display a flashed message
+    """
+    form = RegisterForm()
+
+    if form.validate_on_submit():
+        try:
+            user = User.signup(
+                username=form.username.data,
+                password=form.password.data,
+                email=form.email.data,
+                image_url=form.image_url.data or User.image_url.default.arg,
+            )
+            db.session.commit()
+
+        except IntegrityError:
+            flash("Username or Email already taken", 'danger')
+            return render_template('users/register.html', form=form)
+
+        do_login(user)
+
+        return redirect(url_for('root'))
+
+    else:
+        return render_template('users/register.html', form=form)
+
+@app.route("/login/", methods=["GET", "POST"])
+def login():
+    """Handle user login
+    Display form (GET request) or create new user and add to DB (POST request)
+    If the login is invalid display a flashed message
+    """
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        user = User.authenticate(
+            username=form.username.data,
+            password=form.password.data,
+            )
+        if user:
+            do_login(user)
+            return redirect(url_for('root'))
+
+        flash("Invalid credentials.", 'danger')
+        return render_template('users/login.html', form=form)
+
+    else:
+        return render_template('users/login.html', form=form)
+
+@app.route('/logout/')
+def logout():
+    """Handle logout of user."""
+
+    do_logout()
+    flash("Logged Out", "success")
+    return redirect(url_for('root'))
+
+#
+### GENERAL USER ROUTES
+#
+
+@app.route('/users/<int:user_id>/')
+def show_user(user_id):
+    """Show user profile."""
+
+    user = User.query.get_or_404(user_id)
+
+    return render_template('users/user-information.html', user=user)
+
+@app.route("/users/edit/", methods=["GET", "POST"])
+def edit_user():
+    """Handle edit user
+    Display form (GET request) or edit user and update DB (POST request)
+    """
+    user = User.query.get_or_404(g.user.id)
+    form = EditUser(obj=user)
+
+    if form.validate_on_submit():
+        user = User.authenticate(
+            username=form.username.data,
+            password=form.password.data,
+            )
+        if user:
+            user.username = form.username.data
+            user.email = form.email.data
+            user.image_url = form.image_url.data or "/static/images/no-image.png"
+            user.bio = form.bio.data
+
+            db.session.commit()
+
+            flash(f"Edited Profile", "success")
+            return redirect(f"/users/{g.user.id}")
+
+        flash("Invalid credentials.", 'danger')
+
+    return render_template('users/edit.html', form=form)

@@ -7,7 +7,7 @@
     <div class="row">
       <div class="col-md-3">
         <img src="{{info.image_url}}" alt="image not found!">
-        {% if session['current_user'] %}
+        {% if g.user %}
         <!-- add favoriting here -->
         {% endif %}
       </div>
