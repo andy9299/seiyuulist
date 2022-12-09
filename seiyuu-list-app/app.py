@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, flash, session, g, url_for
+from flask import Flask, request, redirect, render_template, flash, session, g, url_for, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 
 from sqlalchemy.exc import IntegrityError
@@ -147,13 +147,17 @@ def get_info_from_person_data(person_data):
         "website_url": person_data.get("website_url"),
     }
 
+class ApiError(Exception):
+    """Custom exception to show an API error"""
+    pass
+
 def get_jikan_request(url, params=None):
     """Function to handle jikan requests"""
 
     request = requests.get(f"{BASE_URL}{url}", params).json()
     if 'error' in request:
         # This means there isn't the correct data in the api request
-        raise ValueError
+        raise ApiError
     return request
 
 #
@@ -219,7 +223,7 @@ def root():
             all_seasonals=all_seasonals,
         )
 
-    except ValueError:
+    except ApiError:
         flash("Something went wrong with the api request!")
         return render_template("home.html")
 
@@ -237,11 +241,18 @@ def person_info(person_id):
         main_roles = get_info_by_role(person_req.get("data").get("voices"), "character", "main")
         sup_roles = get_info_by_role(person_req.get("data").get("voices"), "character", "supporting")
 
+        is_favorite = (FavoriteSeiyuu
+            .query
+            .filter(FavoriteSeiyuu.user_id == g.user.id)
+            .filter(FavoriteSeiyuu.seiyuu_id == person_id)
+            .first()) is not None
+
         return render_template(
-            "person.html", info=info, main_roles=main_roles, sup_roles=sup_roles
+            "person.html", info=info, main_roles=main_roles, 
+            sup_roles=sup_roles, is_favorite=is_favorite
         )
 
-    except ValueError:
+    except ApiError:
         flash("Something went wrong with the api request!")
         return redirect(url_for('root'))
 
@@ -260,7 +271,7 @@ def anime_info(anime_id):
             "anime.html", info=info, main_characters=main_characters, sup_characters=sup_characters
         )
 
-    except ValueError:
+    except ApiError:
         flash("Something went wrong with the api request!")
         return redirect(url_for('root'))
 
@@ -278,7 +289,7 @@ def character_info(character_id):
             character_info=character_info, main_character_anime=main_character_anime, sup_character_anime=sup_character_anime
             )
 
-    except ValueError:
+    except ApiError:
         flash("Something went wrong with the api request!")
         return redirect(url_for('root'))
 
@@ -304,7 +315,7 @@ def search():
 
         return render_template("search.html", results=results, pages=pages)
 
-    except ValueError:
+    except ApiError:
         flash("Something went wrong with the api request!")
         return redirect(url_for('root'))
 
@@ -318,6 +329,10 @@ def register():
     Display form (GET request) or create new user and add to DB (POST request)
     If the registration is invalid display a flashed message
     """
+    if g.user:
+        flash("Already Logged In!", 'danger')
+        return redirect(url_for('root'))
+
     form = RegisterForm()
 
     if form.validate_on_submit():
@@ -347,6 +362,10 @@ def login():
     Display form (GET request) or create new user and add to DB (POST request)
     If the login is invalid display a flashed message
     """
+    if g.user:
+        flash("Already Logged In!", 'danger')
+        return redirect(url_for('root'))
+
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -395,7 +414,7 @@ def show_user(user_id):
             person_data = get_info_from_person_data(person_req.get("data"))
             favorites.append(person_data)
             
-    except ValueError:
+    except ApiError:
         flash("Something went wrong with the api request!")
         return redirect(url_for('root'))        
 
@@ -433,3 +452,45 @@ def edit_user():
 ### FAVORITING ROUTES
 #
 
+@app.route("/favorite/seiyuu", methods=["POST"])
+def toggle_favorite_seiyuu():
+    """Handle AJAX requests to toggle favorites """
+    if g.user:
+        seiyuu_id = request.json['seiyuu_id']
+        check_favorite_query = (db.session
+                    .query(FavoriteSeiyuu)
+                    .filter(FavoriteSeiyuu.user_id==g.user.id)
+                    .filter(FavoriteSeiyuu.seiyuu_id==seiyuu_id)
+                    .first())
+        # delete favorite since it exists
+        if check_favorite_query:
+            # when removing a favorite we need to update the ranks of all the people below
+            lower_ranked_query = (db.session
+                        .query(FavoriteSeiyuu)
+                        .filter(FavoriteSeiyuu.user_id==g.user.id)
+                        .filter(FavoriteSeiyuu.rank > check_favorite_query.rank)
+                        .all())
+            if len(lower_ranked_query) > 0:
+                update_ranks = (db.session
+                            .query(FavoriteSeiyuu)
+                            .filter(FavoriteSeiyuu.user_id==g.user.id)
+                            .filter(FavoriteSeiyuu.rank > check_favorite_query.rank)
+                            .update({'rank': FavoriteSeiyuu.rank - 1}))
+            db.session.delete(check_favorite_query)
+            db.session.commit()
+
+        else:
+            highest_rank = (db.session
+                    .query(FavoriteSeiyuu.rank)
+                    .filter(FavoriteSeiyuu.user_id==g.user.id)
+                    .order_by(FavoriteSeiyuu.rank.desc())
+                    .first())[0]
+            db.session.add(FavoriteSeiyuu(seiyuu_id=seiyuu_id, user_id=g.user.id, rank=highest_rank+1))
+            db.session.commit()
+        return jsonify({
+            'message': 'success'
+    })
+    else:
+        return jsonify({
+            'error': 'Unauthorized User'
+    }), 401

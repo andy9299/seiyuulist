@@ -13,17 +13,27 @@
       {%- else -%}
       Add a bio!
       {%- endif -%}
+
     </div>
   </div>
 </div>
 {% if g.user.id == user.id %}
-<a href="/users/edit">
-  Edit Profile
-</a>
+<div class="d-flex justify-content-between">
+  <div>
+    <a href="/">
+      Edit Seiyuu Ranking
+    </a>
+  </div>
+  <div>
+    <a href="/users/edit">
+      Edit Profile
+    </a>
+  </div>
+</div>
 {% endif %}
 
 {% if favorites %}
-<h3 class="mt-3">Favorite Seiyuu:</h3>
+<h3 class="mt-3">Top Favorite Seiyuu:</h3>
 
 <div class="img-container favorites-grid">
   {% for seiyuu in favorites %}
