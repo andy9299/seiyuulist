@@ -448,8 +448,32 @@ def edit_user():
 
     return render_template('users/edit.html', form=form)
 
+@app.route('/users/<int:user_id>/rank')
+def show_user_ranking(user_id):
+    """Show user profile."""
+
+    user = User.query.get_or_404(user_id)
+    favorites_query = (db.session
+                .query(FavoriteSeiyuu.seiyuu_id)
+                .filter(FavoriteSeiyuu.user_id==user_id)
+                .order_by(FavoriteSeiyuu.rank.asc())
+                .all())
+    try:
+        favorites = []
+        for (id,) in favorites_query:
+            time.sleep(WAIT_TIME)
+            person_req = get_jikan_request(f"/people/{id}")
+            person_data = get_info_from_person_data(person_req.get("data"))
+            favorites.append(person_data)
+            
+    except ApiError:
+        flash("Something went wrong with the api request!")
+        return redirect(url_for('root'))        
+
+    return render_template('users/rank.html', user=user, favorites=favorites)
+
 #
-### FAVORITING ROUTES
+### FAVORITING/RANKING EDITING ROUTES
 #
 
 @app.route("/favorite/seiyuu", methods=["POST"])
@@ -480,13 +504,33 @@ def toggle_favorite_seiyuu():
             db.session.commit()
 
         else:
-            highest_rank = (db.session
+            lowest_rank = (db.session
                     .query(FavoriteSeiyuu.rank)
                     .filter(FavoriteSeiyuu.user_id==g.user.id)
                     .order_by(FavoriteSeiyuu.rank.desc())
-                    .first())[0]
-            db.session.add(FavoriteSeiyuu(seiyuu_id=seiyuu_id, user_id=g.user.id, rank=highest_rank+1))
+                    .first())
+            if lowest_rank is None:
+                lowest_rank = 0
+            else:
+                lowest_rank = lowest_rank[0]
+            db.session.add(FavoriteSeiyuu(seiyuu_id=seiyuu_id, user_id=g.user.id, rank=lowest_rank+1))
             db.session.commit()
+        return jsonify({
+            'message': 'success'
+    })
+    else:
+        return jsonify({
+            'error': 'Unauthorized User'
+    }), 401
+
+@app.route("/rank/seiyuu", methods=["POST"])
+def edit_seiyuu_rank():
+    """Handle AJAX requests to edit rank """
+    if g.user:
+        for seiyuu_id in request.json:
+            seiyuu_query = FavoriteSeiyuu.query.get_or_404((seiyuu_id, g.user.id))
+            seiyuu_query.rank = request.json[seiyuu_id]
+        db.session.commit()
         return jsonify({
             'message': 'success'
     })

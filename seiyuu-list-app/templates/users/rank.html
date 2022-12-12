@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class=" text-center">{{user.username}}'s Favorites Ranking</h2>
+<div class="mb-3">
+  <img src="{{user.image_url}}" alt="image not found!" class="img-thumbnail normal-img">
+</div>
+
+{% if g.user.id == user.id %}
+<div class="mb-3">
+  <a id="editButton" href="/">
+    Edit seiyuu ranking
+  </a>
+</div>
+{% endif %}
+
+{% if favorites %}
+
+<div id="seiyuuHolder" class="img-container favorites-grid">
+  {% for seiyuu in favorites %}
+  <div class="seiyuu" data-id="{{seiyuu.id}}">
+    <figure class="figure">
+      <a href="/person/{{seiyuu.id}}">
+        <img src="{{seiyuu.image_url}}" class="img-thumbnail normal-img" alt="Image not found!">
+      </a>
+      <figcaption class="figure-caption mt-1">{{seiyuu.name}}</figcaption>
+    </figure>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<h3 class="mt-3">No Favorited Seiyuu!</h3>
+
+{% endif %}
+
+<script src="https://unpkg.com/jquery"></script>
+<script src="https://unpkg.com/axios/dist/axios.js"></script>
+<script src="/static/js/ranking.js"></script>
+<script src="/static/js/jQueryUi/jquery-ui.js"></script>
+{% endblock %}

@@ -1,11 +1,11 @@
 "use strict";
 
-const $favorite = $("#favorite");
+const $editButton = $("#editButton");
 const BASE_URL = "http://127.0.0.1:5000/favorite";
 
 
 
-async function updateFavorite(evt) {
+async function makeDraggable(evt) {
   console.debug("updateFavorite", evt);
   // grabbing the id from the url
   const seiyuu_id = $(location).attr('href').replace(/\/\s*$/, "").split('/').pop();
