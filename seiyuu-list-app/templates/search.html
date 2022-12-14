@@ -4,7 +4,7 @@
 {% if request.args.get('type') == 'anime' %}
 {% for result in results %}
 <div class="container mb-3">
-  <a href="/{{request.args.get('type')}}/{{result.id}}" class="link-light">
+  <a href="/anime/{{result.id}}" class="link-light">
     <h2 class=" text-center">{{result.title}}</h2>
   </a>
   <div class="row">
@@ -26,7 +26,7 @@
 {% elif request.args.get('type') == 'characters' %}
 {% for result in results %}
 <div class="container mb-3">
-  <a href="/{{request.args.get('type')[:-1]}}/{{result.character_id}}" class="link-light">
+  <a href="/character/{{result.character_id}}" class="link-light">
     <h2 class=" text-center">{{result.character_name}}</h2>
   </a>
   <div class="row">
@@ -48,7 +48,7 @@
 {% elif request.args.get('type') == 'people' %}
 {% for result in results %}
 <div class="container mb-3">
-  <a href="/{{request.args.get('type')}}/{{result.id}}" class="link-light">
+  <a href="/person/{{result.id}}" class="link-light">
     <h2 class=" text-center">{{result.name}}</h2>
   </a>
   <div class="row">
