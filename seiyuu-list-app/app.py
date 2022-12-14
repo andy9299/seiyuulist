@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, flash, session, g, url_for, jsonify
+from flask import Flask, request, redirect, render_template, flash, session, g, url_for, jsonify, abort
 from flask_debugtoolbar import DebugToolbarExtension
 
 from sqlalchemy.exc import IntegrityError
@@ -234,18 +234,20 @@ def root():
 @app.route("/person/<int:person_id>")
 def person_info(person_id):
     """View information about a person"""
-
-    try:
-        person_req = get_jikan_request(f"/people/{person_id}/full")
-        info = get_info_from_person_data(person_req.get("data"))
-        main_roles = get_info_by_role(person_req.get("data").get("voices"), "character", "main")
-        sup_roles = get_info_by_role(person_req.get("data").get("voices"), "character", "supporting")
-
+    if g.user:
         is_favorite = (FavoriteSeiyuu
             .query
             .filter(FavoriteSeiyuu.user_id == g.user.id)
             .filter(FavoriteSeiyuu.seiyuu_id == person_id)
             .first()) is not None
+    else:
+        is_favorite = None
+    
+    try:
+        person_req = get_jikan_request(f"/people/{person_id}/full")
+        info = get_info_from_person_data(person_req.get("data"))
+        main_roles = get_info_by_role(person_req.get("data").get("voices"), "character", "main")
+        sup_roles = get_info_by_role(person_req.get("data").get("voices"), "character", "supporting")
 
         return render_template(
             "person.html", info=info, main_roles=main_roles, 
@@ -254,7 +256,7 @@ def person_info(person_id):
 
     except ApiError:
         flash("Something went wrong with the api request!")
-        return redirect(url_for('root'))
+        return render_template('errors/404.html'), 404
 
 
 @app.route("/anime/<int:anime_id>")
@@ -273,7 +275,7 @@ def anime_info(anime_id):
 
     except ApiError:
         flash("Something went wrong with the api request!")
-        return redirect(url_for('root'))
+        return render_template('errors/404.html'), 404
 
 @app.route("/character/<int:character_id>")
 def character_info(character_id):
@@ -291,7 +293,7 @@ def character_info(character_id):
 
     except ApiError:
         flash("Something went wrong with the api request!")
-        return redirect(url_for('root'))
+        return render_template('errors/404.html'), 404
 
 @app.route("/search/")
 def search():
@@ -317,7 +319,7 @@ def search():
 
     except ApiError:
         flash("Something went wrong with the api request!")
-        return redirect(url_for('root'))
+        return render_template('errors/404.html'), 404
 
 #
 ### USER REGISTRATION/LOGIN/LOGOUT ROUTES
