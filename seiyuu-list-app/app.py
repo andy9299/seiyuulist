@@ -6,6 +6,7 @@ from models import db, connect_db, User, FavoriteSeiyuu
 from forms import RegisterForm, LoginForm, EditUser
 
 import os
+import re
 import requests
 import random
 import time
@@ -18,11 +19,15 @@ WAIT_TIME = .5
 app = Flask(__name__)
 
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    os.environ.get('DATABASE_URL', 'postgresql:///seiyuulist'))
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "qwerty")
+
+#Set up psql connection on heroku
+uri = os.environ.get('DATABASE_URL', 'postgresql:///seiyuulist')
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
 
 connect_db(app)
 
