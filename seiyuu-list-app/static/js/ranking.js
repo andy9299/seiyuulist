@@ -1,6 +1,8 @@
 "use strict";
 
-const BASE_URL = "http://127.0.0.1:5000/rank";
+const BASE_URL = window.location.protocol + "//" + window.location.host + "/";
+
+console.log(BASE_URL);
 
 function enableSorting(evt) {
   console.debug("enableSorting", evt);
@@ -23,7 +25,7 @@ async function saveRanking(evt) {
   }).toArray();
   console.log(rankObj);
   await axios({
-    url: `${BASE_URL}/seiyuu`,
+    url: `${BASE_URL}rank/seiyuu`,
     method: "POST",
     data: rankObj
   });
