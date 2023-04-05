@@ -11,8 +11,9 @@ A seiyuu is a voice actor/actress in an anime. And here is a site where you can 
 
 ## Basic User Flow
 1. Land on homepage and view information on a popular seasonal anime
-2. Click on more information about the anime
-3. Create an account in order to favorite and rank seiyuu of their choice
+2. Click to find more information about the anime/seiyuu
+3. Search for an seiyuu you like!
+4. Create an account in order to favorite and rank seiyuu of your choice (feel free to drag them around!)
 
 ## Api  
 Special thanks to https://docs.api.jikan.moe/ for the informational api  
@@ -26,7 +27,3 @@ Special thanks to https://docs.api.jikan.moe/ for the informational api
 * css
 * bootstrap
 * postgresql
-
-## To Add  
-* View who favorited a seiyuu
-* A special search where given 2 seiyuu, it returns anime with the both of them
